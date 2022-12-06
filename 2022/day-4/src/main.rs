@@ -1,4 +1,7 @@
-use std::{fs::File, io::{BufRead, BufReader}};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+};
 
 fn main() {
     let file = File::open("input.txt").unwrap();
@@ -14,9 +17,10 @@ fn main() {
         }
 
         if (ranges[0].0 <= ranges[1].0 && ranges[0].1 >= ranges[1].1)
-            || (ranges[1].0 <= ranges[0].0 && ranges[1].1 >= ranges[0].1) {
-                total += 1;
-            }
+            || (ranges[1].0 <= ranges[0].0 && ranges[1].1 >= ranges[0].1)
+        {
+            total += 1;
+        }
     }
     println!("The total number of fully overlapping ranges is {}", total);
 
@@ -32,9 +36,11 @@ fn main() {
             ranges[i].1 = nums.next().unwrap().parse().unwrap();
         }
 
-        if ranges[0].1 >= ranges[1].0 || ranges[0].0 <= ranges[1].1 {
+        if ranges[0].0 < ranges[1].1 && ranges[0].1 >= ranges[1].0
+            || ranges[1].0 < ranges[0].1 && ranges[1].1 >= ranges[0].0
+        {
             total += 1;
-        }
+        } else { println!("no overlap {:?}", ranges) }
     }
     println!("The total number of at-all overlapping ranges is {}", total);
 }
