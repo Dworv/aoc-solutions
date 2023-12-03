@@ -30,8 +30,6 @@ fn sum_lines(input: &str, replace: bool) {
             }
         }
 
-        println!("{:?}\n---", nums);
-
         acc + nums.0 * 10 + nums.1
     });
 
