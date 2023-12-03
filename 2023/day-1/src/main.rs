@@ -1,21 +1,23 @@
-use utils::rtc;
+use utils::rts;
 
 fn main() {
-    let input = rtc(1);
+    let input = rts(1);
     sum_lines(&input, false);
     sum_lines(&input, true);
 }
 
-fn sum_lines(input: &Vec<char>, replace: bool) {
-    let res = input.split(|c| *c == '\n').fold(0, |acc, line| {
+fn sum_lines(input: &str, replace: bool) {
+    let res = input.lines().fold(0, |acc, line| {
         let mut nums = (0, 0);
         let mut first_found = false;
 
-        if replace {
-            let line = replace_words(line);
-        }
+        let line = if replace {
+            replace_words(line)
+        } else {
+            line.to_string()
+        };
 
-        for c in line {
+        for c in line.chars() {
             if c.is_digit(10) {
                 if !first_found {
                     first_found = true;
@@ -26,18 +28,25 @@ fn sum_lines(input: &Vec<char>, replace: bool) {
                     nums.1 = c.to_digit(10).unwrap();
                 }
             }
-       }
+        }
 
-       acc + nums.0 * 10 + nums.1
+        println!("{:?}\n---", nums);
+
+        acc + nums.0 * 10 + nums.1
     });
 
     println!("Result: {}", res);
 }
 
-fn replace_words(input: &[char]) -> Vec<char> {
+fn replace_words(input: &str) -> String {
     let words = [
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
+        ("one", "one1one"), ("two", "two2two"), ("three", "three3three"), ("four", "four4four"), ("five", "five5five"),
+        ("six", "six6six"), ("seven", "seven7seven"), ("eight", "eight8eight"), ("nine", "nine9nine"),
     ];
-    let mut res = Vec::new();
-    
+    let mut res = input.to_string();
+    for (from, to) in words.iter() {
+        res = res.replace(from, to);
+    }
+    println!("{} -> \n{}", input, res);
+    res
 }
