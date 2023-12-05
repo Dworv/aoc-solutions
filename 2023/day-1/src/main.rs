@@ -45,6 +45,5 @@ fn replace_words(input: &str) -> String {
     for (from, to) in words.iter() {
         res = res.replace(from, to);
     }
-    println!("{} -> \n{}", input, res);
     res
 }
