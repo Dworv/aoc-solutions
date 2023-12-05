@@ -3,6 +3,7 @@ use utils::rts;
 fn main() {
     let input = rts(5);
     part_1(&input);
+    part_2(&input);
 }
 
 fn part_1(input: &str) {
@@ -22,6 +23,20 @@ fn part_1(input: &str) {
 fn part_2(input: &str) {
     let Input { seeds: mut items, maps } = Input::parse(input);
     let mut ranges = items.chunks(2).map(|x| x[0]..(x[0] + x[1])).collect::<Vec<_>>();
+    for mut map in maps {
+        map.sort_by_key(|(_, start, _)| *start);
+        ranges = ranges.iter().flat_map(|range| {
+            let new_ranges = vec![];
+            let mut tip = range.start;
+
+            for (dest, source, len) in map.iter() {
+                if range.
+            }
+
+            new_ranges
+
+        }).collect::<Vec<_>>();
+    }
 }
 
 #[derive(Debug)]
