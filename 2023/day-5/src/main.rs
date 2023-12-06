@@ -26,17 +26,39 @@ fn part_2(input: &str) {
     for mut map in maps {
         map.sort_by_key(|(_, start, _)| *start);
         ranges = ranges.iter().flat_map(|range| {
-            let new_ranges = vec![];
-            let mut tip = range.start;
+            let mut new_ranges = vec![range.clone()];
 
             for (dest, source, len) in map.iter() {
-                if range.
+                
+                let catch_range = *source..(*source + len);
+                let dest_range = *dest..(*dest + len);
+                if catch_range.start <= range.start && catch_range.end >= range.end {
+                    new_ranges[0] = (dest_range.start + (range.start - catch_range.start))..(dest_range.start + (range.end - catch_range.start));
+                }
+                else if catch_range.end >= range.start && catch_range.start <= range.start {
+                    new_ranges[0] = (dest_range.end - (catch_range.end - range.start))..dest_range.end;
+                    new_ranges.push(catch_range.end..range.end);
+                }
+                else if catch_range.start >= range.start && catch_range.end <= range.end {
+                    if catch_range.start > new_ranges.last().unwrap().start {
+                        new_ranges.last_mut().unwrap().end = catch_range.start;
+                    }
+                    new_ranges.push(dest_range.clone());
+                    if range.end > catch_range.end {
+                        new_ranges.push(catch_range.end..range.end);
+                    }
+                }
+                else if catch_range.start <= range.end && catch_range.end >= range.end {
+                    new_ranges.last_mut().unwrap().end = catch_range.start;
+                    new_ranges.push(dest_range.start..(dest_range.start + (range.end - catch_range.start)));
+                }
             }
 
             new_ranges
 
         }).collect::<Vec<_>>();
     }
+    println!("ranges: {:?}", ranges);
 }
 
 #[derive(Debug)]
