@@ -58,7 +58,7 @@ impl CharGrid {
 }
 
 pub trait GetDefault {
-    fn get(&self, x: usize, y: usize) -> char;
+    fn get(&self, x: isize, y: isize) -> char;
 }
 
 pub trait GetOption {
@@ -66,8 +66,11 @@ pub trait GetOption {
 }
 
 impl GetDefault for &CharGrid {
-    fn get(&self, x: usize, y: usize) -> char {
-        self.data.get(y * self.rowlen + x).copied().unwrap_or(self.default_char)
+    fn get(&self, x: isize, y: isize) -> char {
+        if x < 0 || y < 0 {
+            return self.default_char;
+        }
+        self.data.get(y as usize * self.rowlen + x as usize).copied().unwrap_or(self.default_char)
     }
 }
 
