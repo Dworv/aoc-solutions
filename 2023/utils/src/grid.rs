@@ -1,4 +1,4 @@
-use std::{fs::File, io::{BufReader, BufRead}};
+use std::{fs::File, io::{BufReader, BufRead}, fmt::Debug};
 
 pub fn rtg(day: u32) -> CharGrid {
     rtgd(day, ' ')
@@ -30,6 +30,19 @@ pub struct CharGrid {
 }
 
 impl CharGrid {
+    pub fn new(size: (usize, usize), fill_char: char, default_char: char) -> Self {
+        let mut data = vec![fill_char; size.0 * size.1];
+        Self {
+            rowlen: size.0,
+            data,
+            default_char
+        }
+    }
+
+    pub fn set(&mut self, x: usize, y: usize, c: char) {
+        self.data[y * self.rowlen + x] = c;
+    }
+
     pub fn num_rows(&self) -> usize {
         self.data.len() / self.rowlen
     }
@@ -140,5 +153,17 @@ impl DoubleEndedIterator for Col<'_> {
         let res = GetOption::get(&self.grid, self.x, self.end_y);
         self.end_y -= 1;
         res
+    }
+}
+
+impl Debug for CharGrid {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for y in 0..self.num_rows() {
+            for x in 0..self.num_cols() {
+                write!(f, "{}", self.data[y * self.num_cols() + x])?;
+            }
+            writeln!(f)?;
+        }
+        Ok(())
     }
 }
