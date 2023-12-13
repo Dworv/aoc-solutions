@@ -27,7 +27,9 @@ fn part_2(input: &String) {
         springs = springs.repeat(5);
         springs.pop();
         records = records.repeat(5);
-        sum += arrangements(&springs, &records, 0, 0, 0);
+        let total = arrangements(&springs, &records, 0, 0, 0);
+        dbg!(total);
+        sum += total;
     }
 
     println!("Result: {}", sum);
