@@ -31,7 +31,7 @@ pub struct CharGrid {
 
 impl CharGrid {
     pub fn new(size: (usize, usize), fill_char: char, default_char: char) -> Self {
-        let mut data = vec![fill_char; size.0 * size.1];
+        let data = vec![fill_char; size.0 * size.1];
         Self {
             rowlen: size.0,
             data,
