@@ -1,5 +1,7 @@
 use utils::rts;
 
+use cached::{proc_macro::cached, SizedCache};
+
 fn main() {
     let input = rts(12);
 
@@ -12,7 +14,7 @@ fn part_1(input: &String) {
 
     let mut sum = 0;
     for (springs, records) in input {
-        sum += arrangements(&springs, &records, 0, 0, 0);
+        sum += arrangements(&springs, &records, 0);
     }
 
     println!("Result: {}", sum);
@@ -27,13 +29,11 @@ fn part_2(input: &String) {
         springs = springs.repeat(5);
         springs.pop();
         records = records.repeat(5);
-        let total = arrangements(&springs, &records, 0, 0, 0);
-        dbg!(total);
+        let total = arrangements(&springs, &records, 0);
         sum += total;
     }
 
     println!("Result: {}", sum);
-
 }
 
 fn parse(input: &String) -> Vec<(Vec<Spring>, Vec<i64>)> {
@@ -46,35 +46,40 @@ fn parse(input: &String) -> Vec<(Vec<Spring>, Vec<i64>)> {
     }).collect()
 }
 
-fn arrangements(springs: &Vec<Spring>, records: &Vec<i64>, i: usize, mut record_num: usize, damaged_streak: i64) -> i64 {
-    if i == springs.len() {
-        let valid = (record_num == records.len() - 1 && damaged_streak == records.last().unwrap().clone()) || (record_num == records.len() && damaged_streak == 0);
+#[cached(
+    type = "SizedCache<String, i64>",
+    create = "{ SizedCache::with_size(10000) }",
+    convert = r#"{ format!("{:?}|{:?}|{}", springs, records, damaged_streak) }"#
+)]
+fn arrangements(springs: &[Spring], records: &[i64], damaged_streak: i64) -> i64 {
+    if springs.len() == 0 {
+        let valid = (records.len() == 1 && damaged_streak == records.last().unwrap().clone()) || (records.len() == 0 && damaged_streak == 0);
 
         return valid as i64;
     }
-    match springs[i] {
+    match springs[0] {
         Spring::Operational => {
-            if damaged_streak >= 1 {
-                if *records.get(record_num).unwrap_or(&0) != damaged_streak {
+            let offset = if damaged_streak >= 1 {
+                if *records.get(0).unwrap_or(&0) != damaged_streak {
                     return 0;
                 }
-                record_num += 1;
-            }
-            arrangements(springs, records, i + 1, record_num, 0)
+                1
+            } else { 0 };
+            arrangements(&springs[1..], &records[offset..], 0)
         },
         Spring::Damaged => {
-            arrangements(springs, records, i + 1, record_num, damaged_streak + 1)
+            arrangements(&springs[1..], records, damaged_streak + 1)
         },
         Spring::Unknown => {
             // operational
             let exiting_streak = damaged_streak >= 1;
-            let op_arrangements = if !(exiting_streak && *records.get(record_num).unwrap_or(&0) != damaged_streak) {
-                arrangements(springs, records, i + 1, record_num + exiting_streak as usize, 0)
+            let op_arrangements = if !(exiting_streak && *records.get(0).unwrap_or(&0) != damaged_streak) {
+                arrangements(&springs[1..], &records[exiting_streak as usize..], 0)
             } else { 0 };
 
             // damaged
-            let dmg_arrangements = if !(damaged_streak > *records.get(record_num).unwrap_or(&0)) {
-                arrangements(springs, records, i + 1, record_num, damaged_streak + 1)
+            let dmg_arrangements = if !(damaged_streak > *records.get(0).unwrap_or(&0)) {
+                arrangements(&springs[1..], records, damaged_streak + 1)
             } else { 0 };
 
             op_arrangements + dmg_arrangements
