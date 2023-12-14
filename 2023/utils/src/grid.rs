@@ -1,25 +1,13 @@
-use std::{fs::File, io::{BufReader, BufRead}, fmt::Debug};
+use std::{fs::File, io::Read, fmt::Debug};
 
 pub fn rtg(day: u32) -> CharGrid {
     rtgd(day, ' ')
 }
 
 pub fn rtgd(day: u32, default_char: char) -> CharGrid {
-    let mut grid = CharGrid {
-        rowlen: 0,
-        data: Vec::new(),
-        default_char
-    };
-    let mut lines = BufReader::new(File::open(format!("inputs/{}.txt", day)).unwrap()).lines();
-    let first = lines.next().unwrap().unwrap();
-    grid.rowlen = first.len();
-    grid.data.extend(first.chars());
-    for line in lines {
-        let line = line.unwrap();
-        assert_eq!(line.len(), grid.rowlen);
-        grid.data.extend(line.chars());
-    }
-    grid
+    let mut buf = String::new();
+    File::open(format!("inputs/{}.txt", day)).unwrap().read_to_string(&mut buf).unwrap();
+    CharGrid::from_str(&buf, default_char)
 }
 
 /// X is horizontal, Y is vertical
@@ -37,6 +25,24 @@ impl CharGrid {
             data,
             default_char
         }
+    }
+
+    pub fn from_str(s: &str, default_char: char) -> Self {
+        let mut grid = CharGrid {
+            rowlen: 0,
+            data: Vec::new(),
+            default_char: default_char
+        };
+        let mut lines = s.lines();
+        let first = lines.next().unwrap();
+        grid.rowlen = first.len();
+        grid.data.extend(first.chars());
+        for line in lines {
+            let line = line;
+            assert_eq!(line.len(), grid.rowlen);
+            grid.data.extend(line.chars());
+        }
+        grid
     }
 
     pub fn set(&mut self, x: usize, y: usize, c: char) {
