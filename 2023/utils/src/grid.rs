@@ -11,6 +11,7 @@ pub fn rtgd(day: u32, default_char: char) -> CharGrid {
 }
 
 /// X is horizontal, Y is vertical
+#[derive(Clone, PartialEq, Eq)]
 pub struct CharGrid {
     rowlen: usize,
     data: Vec<char>,
