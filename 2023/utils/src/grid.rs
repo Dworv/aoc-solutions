@@ -164,6 +164,7 @@ impl DoubleEndedIterator for Col<'_> {
 
 impl Debug for CharGrid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f)?;
         for y in 0..self.num_rows() {
             for x in 0..self.num_cols() {
                 write!(f, "{}", self.data[y * self.num_cols() + x])?;

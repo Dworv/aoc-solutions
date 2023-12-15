@@ -5,6 +5,7 @@ fn main() {
     let input = parse(&input);
 
     part_1(&input);
+    part_2(&input);
 }
 
 fn part_1(input: &Vec<CharGrid>) {
@@ -15,6 +16,18 @@ fn part_1(input: &Vec<CharGrid>) {
 
         let heq_matrix = heqs(&grid);
         sum += to_refls(&heq_matrix) * 100;
+    }
+    println!("Result: {}", sum);
+}
+
+fn part_2(input: &Vec<CharGrid>) {
+    let mut sum = 0;
+    for grid in input {
+        let veq_matrix = veqs(&grid);
+        sum += to_smudged(&veq_matrix);
+
+        let heq_matrix = heqs(&grid);
+        sum += to_smudged(&heq_matrix) * 100;
     }
     println!("Result: {}", sum);
 }
@@ -40,15 +53,44 @@ fn to_refls(matrix: &CharGrid) -> u64 {
     refl_index_sum
 }
 
+fn to_smudged(matrix: &CharGrid) -> u64 {
+    let mut smudged_index_sum = 0;
+    for i in 1..matrix.num_rows() {
+        let i = i as isize;
+        let mut pos = (i, i-1);
+        let mut has_smudge = false;
+        while pos.0 < matrix.num_cols() as isize && pos.1 >= 0 {
+            match (&matrix).get(pos.0, pos.1) {
+                'O' => {
+                    if has_smudge {
+                        has_smudge = false;
+                        break;
+                    }
+                    has_smudge = true;
+                },
+                ' ' => { has_smudge = false; break},
+                _ => {}
+            }
+            pos.0 += 1;
+            pos.1 -= 1;
+        }
+        if has_smudge {
+            smudged_index_sum += i as u64;
+        }
+    }
+    smudged_index_sum
+}
+
 fn veqs(grid: &CharGrid) -> CharGrid {
     let mut veq_matrix = CharGrid::new((grid.num_cols(), grid.num_cols()), ' ', ' ');
     for i in 0..grid.num_cols() {
         for j in (i + 1)..grid.num_cols() {
             let c1 = grid.col(i);
             let c2 = grid.col(j);
-            veq_matrix.set(j, i, match c1.eq(c2) {
-                true => 'X',
-                false => ' ',
+            veq_matrix.set(j, i, match diffs(c1, c2) {
+                0 => 'X',
+                1 => 'O',
+                2.. => ' '
             });
         }
     }
@@ -61,45 +103,18 @@ fn heqs(grid: &CharGrid) -> CharGrid {
         for j in (i + 1)..grid.num_rows() {
             let c1 = grid.row(i);
             let c2 = grid.row(j);
-            heq_matrix.set(j, i, match c1.eq(c2) {
-                true => 'X',
-                false => ' ',
+            heq_matrix.set(j, i, match diffs(c1, c2) {
+                0 => 'X',
+                1 => 'O',
+                2.. => ' '
             });
         }
     }
     heq_matrix
 }
 
-fn voos(grid: &CharGrid) -> CharGrid {
-    let mut voos_matrix = CharGrid::new((grid.num_cols(), grid.num_cols()), ' ', ' ');
-    for i in 0..grid.num_cols() {
-        for j in (i + 1)..grid.num_cols() {
-            let c1 = grid.col(i);
-            let c2 = grid.col(j);
-            let is_one_off = c1.zip(c2).fold(0, |acc, (c1, c2)| acc + (c1 != c2) as u64 ) == 1;
-            voos_matrix.set(j, i, match is_one_off {
-                true => 'X',
-                false => ' ',
-            });
-        }
-    }
-    voos_matrix
-}
-
-fn hoos(grid: &CharGrid) -> CharGrid {
-    let mut hoos_matrix = CharGrid::new((grid.num_rows(), grid.num_rows()), ' ', ' ');
-    for i in 0..grid.num_rows() {
-        for j in (i + 1)..grid.num_rows() {
-            let c1 = grid.row(i);
-            let c2 = grid.row(j);
-            let is_one_off = c1.zip(c2).fold(0, |acc, (c1, c2)| acc + (c1 != c2) as u64 ) == 1;
-            hoos_matrix.set(j, i, match is_one_off {
-                true => 'X',
-                false => ' ',
-            });
-        }
-    }
-    hoos_matrix
+fn diffs<T: Iterator<Item = char>>(a: T, b: T) -> u64 {
+    a.zip(b).fold(0, |acc, (a, b)| acc + (a != b) as u64)
 }
 
 fn parse(input: &String) -> Vec<CharGrid> {
