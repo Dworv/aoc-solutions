@@ -96,6 +96,9 @@ impl GetDefault for &CharGrid {
 
 impl GetOption for &CharGrid {
     fn get(&self, x: usize, y: usize) -> Option<char> {
+        if x >= self.rowlen {
+            return None;
+        }
         self.data.get(y * self.rowlen + x).copied()
     }
 }
